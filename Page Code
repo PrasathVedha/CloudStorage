@@ -1,0 +1,42 @@
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({
+    accessKeyId: 'YOUR_ACCESS_KEY',
+    secretAccessKey: 'YOUR_SECRET_KEY',
+    region: 'YOUR_REGION'
+});
+
+function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    const params = {
+        Bucket: 'YOUR_BUCKET_NAME',
+        Key: file.name,
+        Body: file
+    };
+    s3.upload(params, (err, data) => {
+        if (err) console.error(err);
+        else alert('File uploaded successfully!');
+    });
+}
+
+function listFiles() {
+    const params = { Bucket: 'YOUR_BUCKET_NAME' };
+    s3.listObjectsV2(params, (err, data) => {
+        if (err) console.error(err);
+        else {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            data.Contents.forEach(file => {
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `https://${params.Bucket}.s3.amazonaws.com/${file.Key}`;
+                link.textContent = file.Key;
+                li.appendChild(link);
+                fileList.appendChild(li);
+            });
+        }
+    });
+}
+
+// Call listFiles on page load
+window.onload = listFiles;
